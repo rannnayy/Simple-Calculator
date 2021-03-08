@@ -19,8 +19,8 @@
 		
 	3.	singleCalculation()
 		Fungsi penghitungan operasi matematika dasar dengan hanya 1 operator dan 2 operand. Program menampilkan jenis-jenis operasi
-		yang dapat dilakukan. User diminta untuk memasukkan 2 buah operand dan 1 buah operator. Hasil perhitungan dikembalikan pada
-		fungsi utama int main().
+		yang dapat dilakukan. User diminta untuk memasukkan 2 buah operand (diasumsikan benar) dan 1 buah operator. Hasil perhitungan 
+		dikembalikan pada fungsi utama int main().
 		Contoh input : 1 <press enter> 2 <press enter> * <press enter>
 		
 	4.	addition(float one, float two)
@@ -40,26 +40,27 @@
 		singleCalculation().
 	
 	8.	power (float one, float two)
-		Fungsi antara penghitungan perpangkatan angka one dengan angka two yang bertipe data float. Hasil perhitungan dikembalikan pada 
-		fungsi singleCalculation().
+		Fungsi antara penghitungan perpangkatan angka one dengan angka two yang bertipe data float. Variabel two telah dipastikan berupa bilangan
+		bulat sehingga hasil perpangkatan dapat ditampilkan tanpa menggunakan library math.h. Hasil perhitungan dikembalikan pada fungsi singleCalculation().
 	
 	9.	integral()
-		Fungsi untuk menghitung nilai integral tentu dengan bantuan fungsi antara fs_polynomial(float x) dan fs_reciprocal(float x).
-		Program memberikan pilihan 2 buah fungsi yang integralnya dapat dihitung, yakni f(x)=x^3+x+1 dan f(x)=1/(1+x^2). User menginput
-		angka 1 untuk memilih fungsi f(x)=x^3+x+1 dan 2 untuk memilih fungsi f(x)=1/(1+x^2). Program juga meminta masukan user berupa
-		batas atas dan bawah integral, serta jumlah interval yang diinginkan user. Hasil perhitungan dikembalikan pada fungsi int main().
-		Contoh input : 1 <press enter> 1 <press enter> 20 <press enter> 20 <press enter>
+		Fungsi untuk menghitung nilai integral tentu dengan bantuan fungsi antara fs_polynomial(float x). Program dapat menghitung integral 
+		dari fungsi yang bentuk umumnya adalah f(x)= ax^n + bx^o + cx^p + dx^q +.... User menginput jumlah suku dari fungsi tersebut yang 
+		hendak dihitung, koefisien (a, b, c,..), dan pangkatnya (n, o, q, ...). Program juga meminta masukan user berupa batas atas dan 
+		bawah integral, serta jumlah interval yang diinginkan user. Hasil perhitungan dikembalikan pada fungsi int main().
+		Contoh input : 5 <press enter> 1 2 <press enter> 2 3 <press enter> 3 4 <press enter> 4 5 <press enter> 5 6 <press enter> 1 <press enter>
+		20 <press enter> 20 <press enter>
 		
 	10.	fs_polynomial(float x)
 		Fungsi untuk menghitung hasil pemetaan x pada fungsi f(x)=x^3+x+1. Hasil perhitungan dikembalikan pada fungsi integral().
 	
-	11. fs_reciprocal(float x)
-		Fungsi untuk menghitung hasil pemetaan x pada fungsi f(x)=1/(1+x^2). Hasil perhitungan dikembalikan pada fungsi integral().
+	11.	isInteger(float s)
+		Fungsi untuk mengecek apakah suatu bilangan merupakan bilangan bulat (sebagai syarat penghitungan pangkat dalam fungsi power().
+		Menghasilkan true apabila merupakan bilangan bulat dan false jika sebaliknya
 */
 
 // LIBRARY
 #include <stdio.h>
-#include <math.h>
 
 float calculation();
 float singleCalculation();
@@ -69,8 +70,8 @@ float multiplication(float one, float two);
 float division(float one, float two);
 float power(float base, float powers);
 float integral();
-float fs_polynomial(float x);
-float fs_reciprocal(float x);
+float fs_polynomial(float x, int n, float coeff[], int powers[]);
+bool isInteger(float s);
 
 int main(){
 	// Deklarasi variabel
@@ -127,6 +128,7 @@ float calculation(){
 	float input(0), total(0);
 	char sign;
 	bool still(true);
+	int input_power;
 	
 	// perintah memasukkan dan meminta masukan user
 	printf("Input number and sign in different lines!\n");
@@ -146,9 +148,16 @@ float calculation(){
 			return total;
 			still = false;
 		}
-		else
+		else{
 			scanf("%f", &input);
-		
+			if (sign=='^'){
+				while (isInteger(input)==false){
+					printf("Input integer number for power\n");
+					scanf("%f", &input);
+				}
+			}
+		}
+		// decision dan operasi perhitungan
 		switch(sign){
 			case '+' : total += input;
 						break;
@@ -158,24 +167,33 @@ float calculation(){
 						break;
 			case '/' : total /= input;
 						break;
-			case '^' : total = pow(total, input);
+			case '^' : total = power(total, input);
 						break;
 		}
 	}
+}
+
+bool isInteger(float s){
+	// mengecek apakah s merupakan integer (bilangan bulat)
+    if (s<1 && s>0)
+    	return false;
+    else if (s==0)
+    	return true;
+    else
+    	return isInteger(s-1);
 }
 
 float singleCalculation(){
 	// deklarasi variabel
 	char Operator;
 	float first, second;
+	int second_power;
 	
 	// menampilkan menu dan meminta inputan user
 	printf("Available operators: + - * / ^\n");
 	
 	printf("Input first number  : ");
 	scanf("%f", &first);
-	printf("Input second number : ");
-	scanf("%f", &second);
 	printf("Input operation : ");
 	scanf("%s", &Operator);
 	
@@ -184,6 +202,16 @@ float singleCalculation(){
 		printf("Input valid operation (+ - * / ^): ");
 		scanf("%s", &Operator);
 	}
+	
+	printf("Input second number : ");
+	scanf("%f", &second);
+	if(Operator=='^'){
+		while (isInteger(second)==false){
+			printf("Input integer number for power!\n");
+			scanf("%f", &second);
+		}
+	}
+	
 	// pemanggilan fungsi perhitungan sesuai pilihan user dan mengembalikan pada fungsi utama main()
 	if (Operator=='+')
 		return addition(first, second);	
@@ -215,33 +243,45 @@ float division(float one, float two){
 }
 float power(float base, float powers){
 	// fungsi perhitungan perpangkatan
-	return pow(base, powers);
+	if (powers==0)
+		return 1;
+	else
+		return (base * power(base, powers-1));
 }
 
-float fs_polynomial(float x){
-	// fungsi perhitungan fungsi Polynomial f(x)=x^3+x+1
-	return (pow(x,3)+x+1);
-}
-
-float fs_reciprocal(float x){
-	// fungsi perhitungan fungsi Reciprocal f(x)=1/(1+x^2)
-	return (1/(1+pow(x,2)));
+float fs_polynomial(float x, int n, float coeff[], float powers[]){
+	// fungsi perhitungan fungsi Polynomial f(x)= ax^n + bx^o + cx^p + dx^q +...
+	float total(0);
+	for (int j=1; j<=n; j++){
+		total += coeff[j]*power(x, powers[j]);
+	}
+	return total;
 }
 
 float integral(){
 	// deklarasi dan inisialisasi variabel
 	int choice4;
-	float a, b, interval, delta, x, tot(0);
+	float a, b, interval, delta, x, tot(0), temp;
 	
-	// menampilkan menu dan meminta inputan pilihan
-	printf("Choose type of function:\n");
-	printf("1. Polynomial Function f(x)=x^3+x+1\n2. Reciprocal Function f(x)=1/(1+x^2)\n");
+	// menampilkan fungsi dengan n suku yang akan diminta user
+	printf("The function is polynomial f(x)= ax^n + bx^o + cx^p + dx^q +... with n x terms\n"); 
+	
+	// meminta masukkan jumlah suku yang diinginkan, masukkan koefisien dan pangkat
+	printf("Input number of x algebraic terms : ");
 	scanf("%d", &choice4);
 	
-	// validasi
-	while (choice4!=1 && choice4!=2){
-		printf("Input valid choice (1/2):\n");
-		scanf("%d", &choice4);
+	float coeff[choice4+1]; // array for storing each coefficient
+	float powers[choice4+1]; // array for storing powers to each corresponding coefficient
+	
+	// input koefisien dan pangkat suku-suku aljabar sebanyak choice4
+	printf("For all %d x terms, input the coefficient (float) and power (integer) :\n", choice4);
+	for (int j=1; j<=choice4; j++){
+		scanf("%f \t %f", &coeff[j], &powers[j]);
+		// validasi input
+		while (isInteger(powers[j])==false){
+			printf("Input integer number for power!\n");
+			scanf("%f", &powers[j]);
+		}
 	}
 	
 	// meminta input batas atas dan bawah serta jumlah interval
@@ -252,20 +292,12 @@ float integral(){
 	printf("Input number of intervals : ");
 	scanf("%f", &interval);
 	
-	// perhitungan hasil integral dan pengembalian ke fungsi utama main()
+	// perhitungan hasil integral melalui fungsi antara dan pengembalian hasil ke fungsi utama main()
 	delta = (b-a)/interval;
-	if (choice4==1){
-		for(int j=1; j<interval; j++){
-			x = a + (j*delta);
-			tot += fs_polynomial(x);
-		}
-		return (fs_polynomial(a)+fs_polynomial(b)+(2*tot))*(delta/2);
+	
+	for(int j=1; j<interval; j++){
+		x = a + (j*delta);
+		tot += fs_polynomial(x, choice4, coeff, powers);
 	}
-	else{
-		for(int j=1; j<interval; j++){
-			x = a + (j*delta);
-			tot += fs_reciprocal(x);
-		}
-		return (fs_reciprocal(a)+fs_reciprocal(b)+(2*tot))*(delta/2);
-	}
+	return (fs_polynomial(a, choice4, coeff, powers)+fs_polynomial(b, choice4, coeff, powers)+(2*tot))*(delta/2);
 }
